@@ -31,3 +31,22 @@ npm run dev
 4. Open `http://localhost:3001`
 
 Use `localhost` for local testing.
+
+## Production / VM startup
+
+`npm run start` uses the Next.js production server, which requires a built `.next` directory.
+That folder is not committed to git, so on a fresh VM checkout you should either:
+
+```bash
+npm install
+npm run build
+npm run start -- -H 0.0.0.0
+```
+
+or simply run:
+
+```bash
+npm run start -- -H 0.0.0.0
+```
+
+The `prestart` script will build the app automatically before the production server starts.

@@ -1,52 +1,54 @@
-# Home Rental Admin
+# Home Rental Admin Dashboard
 
-Admin web application for the `Home-Rental-Backend` project.
+The administrative control center for the Home Rental platform. Built with Next.js, it provides a high-performance, real-time interface for managing properties, users, and financial transactions.
 
-## What it includes
+## ✨ Key Features
 
-- Admin sign-in using the backend `POST /api/auth/login` flow
-- Server-side proxy routes so the browser does not call `localhost:5001` directly
-- Home-rental dashboard overview
-- Rental account listing for owners, tenants, and service providers
-- Property monitoring with activate/deactivate controls
-- Booking and service-request visibility
-- Service category management
-- Legacy operations user management for admins, customers, suppliers, and drivers
+- **Executive Overview**: Real-time stats on bookings, properties, and system health.
+- **Property Command**: Activate/Deactivate listings and monitor property details.
+- **Account Management**: Manage diverse roles including Owners, Tenants, Suppliers, and Drivers.
+- **Financial Monitoring**: Track invoices, bills, and payouts across the platform.
+- **Service Orchestration**: Manage service categories and maintenance requests.
+- **Security**: Next.js middleware and proxy-based API communication.
 
-## Local setup
+## 🛠 Technology Stack
 
-1. In this folder, install dependencies with `npm install`
-2. Create `.env.local` with your Cloudflare backend URL:
+- **Framework**: Next.js 16 (App Router)
+- **Library**: React 19
+- **Styling**: Vanilla CSS (Global & Modules)
+- **API Communication**: Custom proxy layer to bypass CORS issues and secure backend URLs.
 
-```env
-BACKEND_URL=https://your-cloudflare-backend.trycloudflare.com
-```
+## 🚀 Local Development
 
-3. Run the admin app with:
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Environment Configuration**:
+   Create a `.env.local` file:
+   ```env
+   BACKEND_URL=http://localhost:5000
+   ```
+
+3. **Start the Engine**:
+   ```bash
+   npm run dev
+   ```
+   *Dashboard available at `http://localhost:3001`.*
+
+## 📁 Folder Architecture
+
+- `/app`: Next.js routes and layouts.
+- `/components`: Modular UI components (e.g., `admin-dashboard.js`).
+- `/lib`: Helper libraries for backend communication and session management.
+- `/public`: Static assets and icons.
+
+## 🚢 Deployment
+
+The project is optimized for deployment on Vercel or any Node.js environment.
 
 ```bash
-npm run dev
-```
-
-4. Open `http://localhost:3001`
-
-Use `localhost` for local testing.
-
-## Production / VM startup
-
-`npm run start` uses the Next.js production server, which requires a built `.next` directory.
-That folder is not committed to git, so on a fresh VM checkout you should either:
-
-```bash
-npm install
 npm run build
-npm run start -- -H 0.0.0.0
+npm start
 ```
-
-or simply run:
-
-```bash
-npm run start -- -H 0.0.0.0
-```
-
-The `prestart` script will build the app automatically before the production server starts.

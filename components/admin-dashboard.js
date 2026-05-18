@@ -36,7 +36,7 @@ const NAV_ITEMS = [
   },
   {
     id: "operations",
-    label: "Operations Users",
+    label: "User Management",
     description: "Admins, customers, suppliers, drivers",
   },
 ];
@@ -272,13 +272,10 @@ function StatCard({ label, value, hint }) {
 }
 
 function SectionHeader({ title, description, actions }) {
+  if (!actions) return null;
   return (
-    <div className="section-header">
-      <div>
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
-      {actions ? <div className="section-actions">{actions}</div> : null}
+    <div className="section-header-actions-only">
+      {actions}
     </div>
   );
 }
@@ -298,9 +295,11 @@ function DataTable({
   emptyTitle,
   emptyDescription,
   className = "",
+  filterBar = null,
 }) {
   return (
     <div className={`surface table-shell ${className}`.trim()}>
+      {filterBar}
       {rows.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
@@ -336,6 +335,10 @@ export default function AdminDashboard() {
   const [booting, setBooting] = useState(true);
   const [session, setSession] = useState(null);
   const [activeView, setActiveView] = useState("overview");
+  const [opsRoleFilter, setOpsRoleFilter] = useState("all");
+  const [opsSearchFilter, setOpsSearchFilter] = useState("");
+  const [showAdminForm, setShowAdminForm] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
   const [notice, setNotice] = useState(null);
   const [workingKey, setWorkingKey] = useState("");
   const [overview, setOverview] = useState(emptyOverview);
@@ -1285,38 +1288,102 @@ export default function AdminDashboard() {
     </article>
   );
 
+  const getHeaderDetails = () => {
+    switch (activeView) {
+      case "overview":
+        return {
+          title: "Platform overview",
+          subtitle: "Real-time summary of the home-rental pipeline, including account mix, listing volume, booking health, and service activity.",
+        };
+      case "accounts":
+        return {
+          title: "Rental accounts",
+          subtitle: "Manage home owners, tenants, and third-party maintenance providers.",
+        };
+      case "properties":
+        return {
+          title: "Properties control",
+          subtitle: "Monitor, activate, edit, and control home rental listings.",
+        };
+      case "bookings":
+        return {
+          title: "Bookings & Reservations",
+          subtitle: "Track customer bookings, checkout schedules, and booking payments.",
+        };
+      case "requests":
+        return {
+          title: "Service Requests",
+          subtitle: "Track maintenance service flow, tickets, and field agent tasks.",
+        };
+      case "categories":
+        return {
+          title: "Service Categories",
+          subtitle: "Manage maintenance service types, categories, and tags.",
+        };
+      case "operations":
+        return {
+          title: "User Management",
+          subtitle: "Manage administrative, customer, supplier, and driver accounts.",
+        };
+      default:
+        return {
+          title: "Admin Console",
+          subtitle: "Manage your rental listings, payments, and system operations.",
+        };
+    }
+  };
+
+
+
+  const headerDetails = getHeaderDetails();
+
   return (
     <main className="dashboard-shell">
       <aside className="sidebar surface">
-        <div className="brand-block">
-          <span className="brand-kicker">Home Rental</span>
-          <h1>Admin center</h1>
-          <p>One place to watch listings, payments, service flow, and team access.</p>
+        <div className="sidebar-top">
+          <div className="brand-block">
+            <span className="brand-kicker">Home Rental</span>
+            <h1>Admin center</h1>
+            <p>One place to watch listings, payments, service flow, and team access.</p>
+          </div>
+
+          <nav className="nav-list">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                className={`nav-button ${activeView === item.id ? "nav-button-active" : ""}`}
+                type="button"
+                onClick={() => setActiveView(item.id)}
+              >
+                <strong>{item.label}</strong>
+                <span>{item.description}</span>
+              </button>
+            ))}
+          </nav>
         </div>
 
-        <nav className="nav-list">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-button ${
-                activeView === item.id ? "nav-button-active" : ""
-              }`}
-              type="button"
-              onClick={() => setActiveView(item.id)}
-            >
-              <strong>{item.label}</strong>
-              <span>{item.description}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="sidebar-footer">
+          <div className="user-profile-card">
+            <span className="eyebrow">Signed in as</span>
+            <h2>{session?.name || "Admin"}</h2>
+            <p>{session?.email || session?.phone || "Authenticated administrator"}</p>
+          </div>
+          <button
+            className="primary-button subtle"
+            type="button"
+            onClick={handleLogout}
+            disabled={workingKey === "logout"}
+          >
+            {workingKey === "logout" ? "Signing out..." : "Sign out"}
+          </button>
+        </div>
       </aside>
 
       <section className="content-area">
         <header className="surface topbar">
           <div>
-            <span className="eyebrow">Signed in as</span>
-            <h2>{session?.name || "Admin"}</h2>
-            <p>{session?.email || session?.phone || "Authenticated administrator"}</p>
+            <h2>{headerDetails.title}</h2>
+            <p>{headerDetails.subtitle}</p>
           </div>
 
           <div className="topbar-actions">
@@ -1327,14 +1394,6 @@ export default function AdminDashboard() {
               disabled={workingKey === "refresh"}
             >
               {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
-            </button>
-            <button
-              className="primary-button subtle"
-              type="button"
-              onClick={handleLogout}
-              disabled={workingKey === "logout"}
-            >
-              {workingKey === "logout" ? "Signing out..." : "Sign out"}
             </button>
           </div>
         </header>
@@ -1416,55 +1475,28 @@ export default function AdminDashboard() {
             <SectionHeader
               title="Home-rental accounts"
               description="Search the dedicated home-rental identities created through email-based signup."
-              actions={
-                <form
-                  className="inline-filter"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    try {
-                      await loadAccounts(accountFilters);
-                    } catch (error) {
-                      setNotice({ type: "error", message: error.message });
-                    }
-                  }}
-                >
-                  <select
-                    value={accountFilters.role}
-                    onChange={(event) =>
-                      setAccountFilters((current) => ({
-                        ...current,
-                        role: event.target.value,
-                      }))
-                    }
-                  >
-                    {ACCOUNT_ROLE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder="Search name, email, or phone"
-                    value={accountFilters.search}
-                    onChange={(event) =>
-                      setAccountFilters((current) => ({
-                        ...current,
-                        search: event.target.value,
-                      }))
-                    }
-                  />
-                  <button className="ghost-button" type="submit">
-                    Apply
-                  </button>
-                </form>
-              }
             />
-
             <DataTable
               columns={accountColumns}
               rows={accounts}
               emptyTitle="No rental accounts matched your filters"
               emptyDescription="Try another role filter or a broader search term."
+              filterBar={
+                <form
+                  className="ops-filter-bar"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    try { await loadAccounts(accountFilters); }
+                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  }}
+                >
+                  <select value={accountFilters.role} onChange={(e) => setAccountFilters((c) => ({ ...c, role: e.target.value }))}>
+                    {ACCOUNT_ROLE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <input placeholder="Search name, email, or phone" value={accountFilters.search} onChange={(e) => setAccountFilters((c) => ({ ...c, search: e.target.value }))} />
+                  <button className="ghost-button" type="submit">Apply</button>
+                </form>
+              }
             />
           </section>
         ) : null}
@@ -1474,55 +1506,28 @@ export default function AdminDashboard() {
             <SectionHeader
               title="Property administration"
               description="Review listings, monitor owner activity, and toggle visibility without touching the mobile app."
-              actions={
-                <form
-                  className="inline-filter"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    try {
-                      await loadProperties(propertyFilters);
-                    } catch (error) {
-                      setNotice({ type: "error", message: error.message });
-                    }
-                  }}
-                >
-                  <select
-                    value={propertyFilters.status}
-                    onChange={(event) =>
-                      setPropertyFilters((current) => ({
-                        ...current,
-                        status: event.target.value,
-                      }))
-                    }
-                  >
-                    {PROPERTY_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder="Search title, code, owner, location"
-                    value={propertyFilters.search}
-                    onChange={(event) =>
-                      setPropertyFilters((current) => ({
-                        ...current,
-                        search: event.target.value,
-                      }))
-                    }
-                  />
-                  <button className="ghost-button" type="submit">
-                    Apply
-                  </button>
-                </form>
-              }
             />
-
             <DataTable
               columns={propertyColumns}
               rows={properties}
               emptyTitle="No properties matched your filters"
               emptyDescription="Try clearing the status filter or search query."
+              filterBar={
+                <form
+                  className="ops-filter-bar"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    try { await loadProperties(propertyFilters); }
+                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  }}
+                >
+                  <select value={propertyFilters.status} onChange={(e) => setPropertyFilters((c) => ({ ...c, status: e.target.value }))}>
+                    {PROPERTY_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <input placeholder="Search title, code, owner, location" value={propertyFilters.search} onChange={(e) => setPropertyFilters((c) => ({ ...c, search: e.target.value }))} />
+                  <button className="ghost-button" type="submit">Apply</button>
+                </form>
+              }
             />
           </section>
         ) : null}
@@ -1532,70 +1537,31 @@ export default function AdminDashboard() {
             <SectionHeader
               title="Booking visibility"
               description="Track reservation states, deposit behavior, and how much service demand each booking creates."
-              actions={
-                <form
-                  className="inline-filter inline-filter-wide"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    try {
-                      await loadBookings(bookingFilters);
-                    } catch (error) {
-                      setNotice({ type: "error", message: error.message });
-                    }
-                  }}
-                >
-                  <select
-                    value={bookingFilters.bookingStatus}
-                    onChange={(event) =>
-                      setBookingFilters((current) => ({
-                        ...current,
-                        bookingStatus: event.target.value,
-                      }))
-                    }
-                  >
-                    {BOOKING_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={bookingFilters.paymentStatus}
-                    onChange={(event) =>
-                      setBookingFilters((current) => ({
-                        ...current,
-                        paymentStatus: event.target.value,
-                      }))
-                    }
-                  >
-                    {PAYMENT_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder="Search booking, property, owner, tenant"
-                    value={bookingFilters.search}
-                    onChange={(event) =>
-                      setBookingFilters((current) => ({
-                        ...current,
-                        search: event.target.value,
-                      }))
-                    }
-                  />
-                  <button className="ghost-button" type="submit">
-                    Apply
-                  </button>
-                </form>
-              }
             />
-
             <DataTable
               columns={bookingColumns}
               rows={bookings}
               emptyTitle="No bookings matched your filters"
               emptyDescription="Adjust the booking or payment state filters to widen the result set."
+              filterBar={
+                <form
+                  className="ops-filter-bar"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    try { await loadBookings(bookingFilters); }
+                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  }}
+                >
+                  <select value={bookingFilters.bookingStatus} onChange={(e) => setBookingFilters((c) => ({ ...c, bookingStatus: e.target.value }))}>
+                    {BOOKING_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <select value={bookingFilters.paymentStatus} onChange={(e) => setBookingFilters((c) => ({ ...c, paymentStatus: e.target.value }))}>
+                    {PAYMENT_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <input placeholder="Search booking, property, owner, tenant" value={bookingFilters.search} onChange={(e) => setBookingFilters((c) => ({ ...c, search: e.target.value }))} />
+                  <button className="ghost-button" type="submit">Apply</button>
+                </form>
+              }
             />
           </section>
         ) : null}
@@ -1605,55 +1571,28 @@ export default function AdminDashboard() {
             <SectionHeader
               title="Service request flow"
               description="Follow provider matching after a booking is fully paid, including assignment activity and response counts."
-              actions={
-                <form
-                  className="inline-filter"
-                  onSubmit={async (event) => {
-                    event.preventDefault();
-                    try {
-                      await loadServiceRequests(requestFilters);
-                    } catch (error) {
-                      setNotice({ type: "error", message: error.message });
-                    }
-                  }}
-                >
-                  <select
-                    value={requestFilters.status}
-                    onChange={(event) =>
-                      setRequestFilters((current) => ({
-                        ...current,
-                        status: event.target.value,
-                      }))
-                    }
-                  >
-                    {REQUEST_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder="Search booking, category, owner, tenant, provider"
-                    value={requestFilters.search}
-                    onChange={(event) =>
-                      setRequestFilters((current) => ({
-                        ...current,
-                        search: event.target.value,
-                      }))
-                    }
-                  />
-                  <button className="ghost-button" type="submit">
-                    Apply
-                  </button>
-                </form>
-              }
             />
-
             <DataTable
               columns={serviceRequestColumns}
               rows={serviceRequests}
               emptyTitle="No service requests matched your filters"
               emptyDescription="Try switching the request status filter or searching a different booking."
+              filterBar={
+                <form
+                  className="ops-filter-bar"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    try { await loadServiceRequests(requestFilters); }
+                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  }}
+                >
+                  <select value={requestFilters.status} onChange={(e) => setRequestFilters((c) => ({ ...c, status: e.target.value }))}>
+                    {REQUEST_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <input placeholder="Search booking, category, owner, provider" value={requestFilters.search} onChange={(e) => setRequestFilters((c) => ({ ...c, search: e.target.value }))} />
+                  <button className="ghost-button" type="submit">Apply</button>
+                </form>
+              }
             />
           </section>
         ) : null}
@@ -1759,9 +1698,17 @@ export default function AdminDashboard() {
                     <h3>Create admin</h3>
                     <p>Admins can access this dashboard and protected management endpoints.</p>
                   </div>
+                  <button
+                    className="collapse-toggle"
+                    type="button"
+                    aria-label="Toggle form"
+                    onClick={() => setShowAdminForm((v) => !v)}
+                  >
+                    {showAdminForm ? "▾" : "▸"}
+                  </button>
                 </div>
 
-                <form className="form-stack" onSubmit={handleCreateAdmin}>
+                {showAdminForm && <form className="form-stack" onSubmit={handleCreateAdmin}>
                   <div className="form-grid">
                     <label className="field">
                       <span>Name</span>
@@ -1824,7 +1771,7 @@ export default function AdminDashboard() {
                   >
                     {workingKey === "admin-create" ? "Creating..." : "Create admin"}
                   </button>
-                </form>
+                </form>}
               </article>
 
               <article className="surface">
@@ -1833,9 +1780,17 @@ export default function AdminDashboard() {
                     <h3>Create operations user</h3>
                     <p>Use supplier and driver roles for the older operational workflows.</p>
                   </div>
+                  <button
+                    className="collapse-toggle"
+                    type="button"
+                    aria-label="Toggle form"
+                    onClick={() => setShowUserForm((v) => !v)}
+                  >
+                    {showUserForm ? "▾" : "▸"}
+                  </button>
                 </div>
 
-                <form className="form-stack" onSubmit={handleCreateUser}>
+                {showUserForm && <form className="form-stack" onSubmit={handleCreateUser}>
                   <div className="form-grid">
                     <label className="field">
                       <span>Name</span>
@@ -1953,16 +1908,101 @@ export default function AdminDashboard() {
                   >
                     {workingKey === "user-create" ? "Creating..." : "Create user"}
                   </button>
-                </form>
+                </form>}
               </article>
             </div>
 
-            <div className="operations-grid">
-              {renderOperationsBucket("Admins", opsUsers.admins, "admin")}
-              {renderOperationsBucket("Customers", opsUsers.customer, "customer")}
-              {renderOperationsBucket("Suppliers", opsUsers.supplier, "supplier")}
-              {renderOperationsBucket("Drivers", opsUsers.driver, "driver")}
-            </div>
+            {(() => {
+              const allUsers = [
+                ...opsUsers.admins.map((u) => ({ ...u, _kind: "admin" })),
+                ...opsUsers.customer.map((u) => ({ ...u, _kind: "customer" })),
+                ...opsUsers.supplier.map((u) => ({ ...u, _kind: "supplier" })),
+                ...opsUsers.driver.map((u) => ({ ...u, _kind: "driver" })),
+              ];
+              const filtered = allUsers.filter((u) => {
+                const roleMatch = opsRoleFilter === "all" || u._kind === opsRoleFilter;
+                const q = opsSearchFilter.trim().toLowerCase();
+                const searchMatch = !q ||
+                  (u.name || "").toLowerCase().includes(q) ||
+                  (u.email || "").toLowerCase().includes(q) ||
+                  (u.phone || "").toLowerCase().includes(q);
+                return roleMatch && searchMatch;
+              });
+              return (
+                <article className="surface table-shell">
+                  <div className="ops-filter-bar">
+                    <select
+                      value={opsRoleFilter}
+                      onChange={(e) => setOpsRoleFilter(e.target.value)}
+                    >
+                      <option value="all">All roles</option>
+                      <option value="admin">Admins</option>
+                      <option value="customer">Customers</option>
+                      <option value="supplier">Suppliers</option>
+                      <option value="driver">Drivers</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Search name, email or phone…"
+                      value={opsSearchFilter}
+                      onChange={(e) => setOpsSearchFilter(e.target.value)}
+                    />
+                  </div>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Contact</th>
+                          <th>Role</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.length === 0 ? (
+                          <tr>
+                            <td colSpan={4}>
+                              <EmptyState title="No users found" description="Try adjusting your filters." />
+                            </td>
+                          </tr>
+                        ) : (
+                          filtered.map((u) => (
+                            <tr key={`${u._kind}-${u.id}`}>
+                              <td><strong>{u.name}</strong></td>
+                              <td>{u.email || u.phone}</td>
+                              <td>
+                                <StatusBadge tone={getTone(u._kind === "admin" ? "active" : "pending")}>
+                                  {u._kind}
+                                </StatusBadge>
+                              </td>
+                              <td>
+                                <button
+                                  className="ghost-button compact danger"
+                                  type="button"
+                                  onClick={() =>
+                                    u._kind === "admin"
+                                      ? handleDeleteAdmin(u.id)
+                                      : handleDeleteUser(u.id)
+                                  }
+                                  disabled={
+                                    workingKey === `admin-delete-${u.id}` ||
+                                    workingKey === `user-delete-${u.id}`
+                                  }
+                                >
+                                  {workingKey === `admin-delete-${u.id}` || workingKey === `user-delete-${u.id}`
+                                    ? "Deleting…"
+                                    : "Delete"}
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              );
+            })()}
           </section>
         ) : null}
       </section>

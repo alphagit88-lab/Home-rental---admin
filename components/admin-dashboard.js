@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   {
     id: "requests",
     label: "Service Requests",
-    description: "Post-booking provider workflows",
+    description: "Post-booking service-provider workflows",
   },
   {
     id: "categories",
@@ -45,7 +45,7 @@ const ACCOUNT_ROLE_OPTIONS = [
   { value: "all", label: "All roles" },
   { value: "owner", label: "Owners" },
   { value: "tenant", label: "Tenants" },
-  { value: "service_provider", label: "Service providers" },
+  { value: "service_provider", label: "Service Providers" },
 ];
 
 const PROPERTY_STATUS_OPTIONS = [
@@ -112,6 +112,19 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });
+
+const APP_ROLE_LABELS = {
+  owner: "Owner",
+  tenant: "Tenant",
+  service_provider: "Service Provider",
+};
+
+const SYSTEM_ROLE_LABELS = {
+  admin: "Admin",
+  customer: "Customer",
+  supplier: "Supplier",
+  driver: "Driver",
+};
 
 const emptyOverview = {
   summary: {
@@ -219,6 +232,38 @@ const formatDateTime = (value) => {
   }
 
   return dateTimeFormatter.format(parsed);
+};
+
+const formatAppRoleLabel = (value) => {
+  if (!value) {
+    return "-";
+  }
+
+  return APP_ROLE_LABELS[value] || String(value).replace(/_/g, " ");
+};
+
+const formatSystemRoleLabel = (value) => {
+  if (!value) {
+    return "-";
+  }
+
+  return SYSTEM_ROLE_LABELS[value] || value;
+};
+
+const getAppRoleTone = (value) => {
+  if (value === "owner") {
+    return "good";
+  }
+
+  if (value === "service_provider") {
+    return "warn";
+  }
+
+  if (value === "tenant") {
+    return "info";
+  }
+
+  return "neutral";
 };
 
 const getTone = (status) => {
@@ -865,7 +910,7 @@ export default function AdminDashboard() {
     },
     {
       key: "guest",
-      label: "Guest / Owner",
+      label: "Tenant / Owner",
       render: (row) => (
         <div className="stacked-cell">
           <strong>{row.tenantName}</strong>
@@ -911,7 +956,7 @@ export default function AdminDashboard() {
     },
     {
       key: "actors",
-      label: "Tenant / Provider",
+      label: "Tenant / Service Provider",
       render: (row) => (
         <div className="stacked-cell">
           <strong>{row.tenantName}</strong>
@@ -950,8 +995,8 @@ export default function AdminDashboard() {
       key: "appRole",
       label: "App role",
       render: (row) => (
-        <StatusBadge tone={getTone(row.appRole === "owner" ? "active" : "pending")}>
-          {row.appRole}
+        <StatusBadge tone={getAppRoleTone(row.appRole)}>
+          {formatAppRoleLabel(row.appRole)}
         </StatusBadge>
       ),
     },
@@ -963,7 +1008,7 @@ export default function AdminDashboard() {
     {
       key: "systemRole",
       label: "System role",
-      render: (row) => row.systemRole,
+      render: (row) => formatSystemRoleLabel(row.systemRole),
     },
     {
       key: "activity",
@@ -1154,7 +1199,7 @@ export default function AdminDashboard() {
     },
     {
       key: "tenantName",
-      label: "Tenant / owner",
+      label: "Tenant / Owner",
       render: (row) => (
         <div className="stacked-cell">
           <strong>{row.tenantName}</strong>
@@ -1164,7 +1209,7 @@ export default function AdminDashboard() {
     },
     {
       key: "serviceProviderName",
-      label: "Provider",
+      label: "Service Provider",
       render: (row) => row.serviceProviderName || "Unassigned",
     },
     {
@@ -1298,7 +1343,7 @@ export default function AdminDashboard() {
       case "accounts":
         return {
           title: "Rental accounts",
-          subtitle: "Manage home owners, tenants, and third-party maintenance providers.",
+          subtitle: "Manage owners, tenants, and service providers across the rental app.",
         };
       case "properties":
         return {
@@ -1308,12 +1353,12 @@ export default function AdminDashboard() {
       case "bookings":
         return {
           title: "Bookings & Reservations",
-          subtitle: "Track customer bookings, checkout schedules, and booking payments.",
+          subtitle: "Track tenant bookings, checkout schedules, and booking payments.",
         };
       case "requests":
         return {
           title: "Service Requests",
-          subtitle: "Track maintenance service flow, tickets, and field agent tasks.",
+          subtitle: "Track service-provider assignment, acceptance, and completion.",
         };
       case "categories":
         return {
@@ -1415,7 +1460,7 @@ export default function AdminDashboard() {
               <StatCard
                 label="Active rental accounts"
                 value={summary.activeAccounts}
-                hint={`${summary.owners} owners, ${summary.tenants} tenants, ${summary.serviceProviders} providers`}
+                hint={`${summary.owners} owners, ${summary.tenants} tenants, ${summary.serviceProviders} service providers`}
               />
               <StatCard
                 label="Live properties"
@@ -1464,7 +1509,7 @@ export default function AdminDashboard() {
                 columns={recentRequestColumns}
                 rows={overview.recentServiceRequests || []}
                 emptyTitle="No service requests yet"
-                emptyDescription="Provider-side requests will appear here after paid bookings create service demand."
+                emptyDescription="Service-provider requests will appear here after paid bookings create service demand."
               />
             </div>
           </section>
@@ -1589,7 +1634,7 @@ export default function AdminDashboard() {
                   <select value={requestFilters.status} onChange={(e) => setRequestFilters((c) => ({ ...c, status: e.target.value }))}>
                     {REQUEST_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
-                  <input placeholder="Search booking, category, owner, provider" value={requestFilters.search} onChange={(e) => setRequestFilters((c) => ({ ...c, search: e.target.value }))} />
+                  <input placeholder="Search booking, category, owner, service provider" value={requestFilters.search} onChange={(e) => setRequestFilters((c) => ({ ...c, search: e.target.value }))} />
                   <button className="ghost-button" type="submit">Apply</button>
                 </form>
               }
@@ -1678,7 +1723,7 @@ export default function AdminDashboard() {
                 columns={categoryColumns}
                 rows={categories}
                 emptyTitle="No categories available"
-                emptyDescription="Create your first service category to support provider workflows."
+                emptyDescription="Create your first service category to support service-provider workflows."
               />
             </div>
           </section>

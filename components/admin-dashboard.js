@@ -6,12 +6,17 @@ import { useRouter } from "next/navigation";
 const NAV_ITEMS = [
   {
     id: "overview",
-    label: "Overview",
+    label: "Dashboard",
     description: "KPIs, revenue, and latest activity",
   },
   {
+    id: "operations",
+    label: "User Management",
+    description: "Admins, customers, suppliers, drivers",
+  },
+  {
     id: "accounts",
-    label: "Rental Accounts",
+    label: "Accounts",
     description: "Owners, tenants, and service providers",
   },
   {
@@ -33,11 +38,6 @@ const NAV_ITEMS = [
     id: "categories",
     label: "Categories",
     description: "Service category management",
-  },
-  {
-    id: "operations",
-    label: "User Management",
-    description: "Admins, customers, suppliers, drivers",
   },
 ];
 
@@ -195,12 +195,12 @@ const buildQuery = (entries) => {
 
 const formatMoney = (value, precise = false) => {
   if (value === null || value === undefined || value === "") {
-    return "—";
+    return "-";
   }
 
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) {
-    return "—";
+    return "-";
   }
 
   return precise
@@ -210,12 +210,12 @@ const formatMoney = (value, precise = false) => {
 
 const formatDate = (value) => {
   if (!value) {
-    return "—";
+    return "-";
   }
 
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
-    return "—";
+    return "-";
   }
 
   return dateFormatter.format(parsed);
@@ -223,12 +223,12 @@ const formatDate = (value) => {
 
 const formatDateTime = (value) => {
   if (!value) {
-    return "—";
+    return "-";
   }
 
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
-    return "—";
+    return "-";
   }
 
   return dateTimeFormatter.format(parsed);
@@ -372,6 +372,188 @@ function DataTable({
         </div>
       )}
     </div>
+  );
+}
+
+function AdminIcon({ name }) {
+  const iconProps = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  switch (name) {
+    case "overview":
+    case "dashboard":
+      return (
+        <svg {...iconProps}>
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      );
+    case "operations":
+      return (
+        <svg {...iconProps}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+          <circle cx="9.5" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      );
+    case "accounts":
+      return (
+        <svg {...iconProps}>
+          <path d="M20 21a8 8 0 1 0-16 0" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      );
+    case "properties":
+      return (
+        <svg {...iconProps}>
+          <path d="M3 10.5 12 3l9 7.5" />
+          <path d="M5 9.5V21h14V9.5" />
+          <path d="M10 21v-6h4v6" />
+        </svg>
+      );
+    case "bookings":
+      return (
+        <svg {...iconProps}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M16 3v4" />
+          <path d="M8 3v4" />
+          <path d="M3 11h18" />
+        </svg>
+      );
+    case "requests":
+      return (
+        <svg {...iconProps}>
+          <path d="M14.5 4.5 19.5 9.5" />
+          <path d="M5 19l3.5-.7L18.8 8a1.8 1.8 0 0 0 0-2.6l-.2-.2a1.8 1.8 0 0 0-2.6 0L5.7 15.5 5 19z" />
+        </svg>
+      );
+    case "categories":
+      return (
+        <svg {...iconProps}>
+          <path d="m12 3 8 4-8 4-8-4 8-4z" />
+          <path d="m4 12 8 4 8-4" />
+          <path d="m4 17 8 4 8-4" />
+        </svg>
+      );
+    case "money":
+      return (
+        <svg {...iconProps}>
+          <path d="M12 1v22" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      );
+    case "deposit":
+      return (
+        <svg {...iconProps}>
+          <path d="M3 7h18v10H3z" />
+          <path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+          <circle cx="12" cy="12" r="2.5" />
+        </svg>
+      );
+    case "refresh":
+      return (
+        <svg {...iconProps}>
+          <path d="M21 12a9 9 0 0 1-15.5 6.4" />
+          <path d="M3 12A9 9 0 0 1 18.5 5.6" />
+          <path d="M19 2v5h-5" />
+          <path d="M5 22v-5h5" />
+        </svg>
+      );
+    case "logout":
+      return (
+        <svg {...iconProps}>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <path d="M16 17l5-5-5-5" />
+          <path d="M21 12H9" />
+        </svg>
+      );
+    case "plus":
+      return (
+        <svg {...iconProps}>
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      );
+    case "pulse":
+      return (
+        <svg {...iconProps}>
+          <path d="M2 12h4l2.2-4 3.6 8 2.8-6H22" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...iconProps}>
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+      );
+  }
+}
+
+function AdminMetricCard({
+  icon,
+  label,
+  value,
+  caption,
+  trend,
+  tone = "violet",
+}) {
+  return (
+    <article className={`surface admin-metric-card admin-tone-${tone}`.trim()}>
+      <div className="admin-metric-top">
+        <span className="admin-icon-badge">
+          <AdminIcon name={icon} />
+        </span>
+        {trend ? <span className="admin-trend-pill">{trend}</span> : null}
+      </div>
+      <span className="admin-metric-label">{label}</span>
+      <strong className="admin-metric-value">{value}</strong>
+      {caption ? <span className="admin-metric-caption">{caption}</span> : null}
+    </article>
+  );
+}
+
+function AdminPageHeader({ title, description, actions }) {
+  return (
+    <header className="admin-page-header">
+      <div className="admin-page-copy">
+        <h1>{title}</h1>
+        <p>{description}</p>
+      </div>
+      {actions ? <div className="admin-page-actions">{actions}</div> : null}
+    </header>
+  );
+}
+
+function AdminPanel({
+  title,
+  description,
+  actions,
+  className = "",
+  children,
+}) {
+  return (
+    <section className={`surface admin-panel ${className}`.trim()}>
+      {title || description || actions ? (
+        <div className="admin-panel-head">
+          <div>
+            {title ? <h3>{title}</h3> : null}
+            {description ? <p>{description}</p> : null}
+          </div>
+          {actions ? <div className="admin-panel-actions">{actions}</div> : null}
+        </div>
+      ) : null}
+      {children}
+    </section>
   );
 }
 
@@ -872,7 +1054,7 @@ export default function AdminDashboard() {
       render: (row) => (
         <div className="stacked-cell">
           <strong>{row.ownerName}</strong>
-          <span>{row.ownerEmail || "—"}</span>
+          <span>{row.ownerEmail || "-"}</span>
         </div>
       ),
     },
@@ -1003,7 +1185,7 @@ export default function AdminDashboard() {
     {
       key: "phone",
       label: "Phone",
-      render: (row) => row.phone || "—",
+      render: (row) => row.phone || "-",
     },
     {
       key: "systemRole",
@@ -1054,7 +1236,7 @@ export default function AdminDashboard() {
       render: (row) => (
         <div className="stacked-cell">
           <strong>{row.ownerName}</strong>
-          <span>{row.ownerEmail || "—"}</span>
+          <span>{row.ownerEmail || "-"}</span>
         </div>
       ),
     },
@@ -1284,6 +1466,334 @@ export default function AdminDashboard() {
     },
   ];
 
+  const formatTextLabel = (value) => {
+    if (!value) {
+      return "-";
+    }
+
+    return String(value).replace(/_/g, " ");
+  };
+
+  const getTimestampValue = (value) => {
+    const parsed = new Date(value).getTime();
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const sessionInitials = (session?.name || "Admin")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("") || "A";
+
+  const activeCategoryCount = categories.filter((category) => category.is_active).length;
+
+  const allOperationsUsers = [
+    ...opsUsers.admins.map((user) => ({ ...user, _kind: "admin" })),
+    ...opsUsers.customer.map((user) => ({ ...user, _kind: "customer" })),
+    ...opsUsers.supplier.map((user) => ({ ...user, _kind: "supplier" })),
+    ...opsUsers.driver.map((user) => ({ ...user, _kind: "driver" })),
+  ];
+
+  const filteredOperationsUsers = allOperationsUsers.filter((user) => {
+    const matchesRole = opsRoleFilter === "all" || user._kind === opsRoleFilter;
+    const query = opsSearchFilter.trim().toLowerCase();
+    const matchesSearch = !query
+      || (user.name || "").toLowerCase().includes(query)
+      || (user.email || "").toLowerCase().includes(query)
+      || (user.phone || "").toLowerCase().includes(query);
+
+    return matchesRole && matchesSearch;
+  });
+
+  const overviewActivity = [
+    ...(overview.recentBookings || []).map((item) => ({
+      id: `booking-${item.id || item.bookingCode}`,
+      title: item.bookingCode || "New booking",
+      description: `${item.tenantName || "Tenant"} reserved ${item.propertyTitle || "a property"}.`,
+      meta: `${formatTextLabel(item.bookingStatus)} / ${formatTextLabel(item.paymentStatus)}`,
+      timestamp: item.createdAt,
+      icon: "bookings",
+      tone: "violet",
+    })),
+    ...(overview.recentProperties || []).map((item) => ({
+      id: `property-${item.id || item.propertyCode}`,
+      title: item.title || "New property",
+      description: `${item.ownerName || "Owner"} listed ${item.locationText || item.propertyCode || "a home"}.`,
+      meta: item.isActive ? "Listing active" : "Listing inactive",
+      timestamp: item.createdAt,
+      icon: "properties",
+      tone: "emerald",
+    })),
+    ...(overview.recentServiceRequests || []).map((item) => ({
+      id: `request-${item.id || item.bookingCode || item.serviceCategoryName}`,
+      title: item.serviceCategoryName || "Service request",
+      description: `${item.tenantName || "Tenant"} requested support for ${item.propertyTitle || "a stay"}.`,
+      meta: item.serviceProviderName || "Waiting for provider assignment",
+      timestamp: item.createdAt,
+      icon: "requests",
+      tone: "orange",
+    })),
+  ]
+    .sort((left, right) => getTimestampValue(right.timestamp) - getTimestampValue(left.timestamp))
+    .slice(0, 8);
+
+  const overviewMetrics = [
+    {
+      icon: "accounts",
+      label: "Active Accounts",
+      value: summary.activeAccounts,
+      trend: `${summary.owners} owners`,
+      caption: `${summary.tenants} tenants and ${summary.serviceProviders} providers`,
+      tone: "violet",
+    },
+    {
+      icon: "properties",
+      label: "Live Properties",
+      value: summary.activeProperties,
+      trend: `${summary.totalProperties} total`,
+      caption: `${summary.inactiveProperties} inactive listings`,
+      tone: "emerald",
+    },
+    {
+      icon: "bookings",
+      label: "Reservations",
+      value: summary.totalBookings,
+      trend: `${summary.confirmedBookings} confirmed`,
+      caption: `${summary.pendingBookings} pending and ${summary.completedBookings} completed`,
+      tone: "cyan",
+    },
+    {
+      icon: "requests",
+      label: "Service Requests",
+      value: summary.totalServiceRequests,
+      trend: `${summary.acceptedServiceRequests} accepted`,
+      caption: `${summary.pendingServiceRequests} pending and ${summary.completedServiceRequests} completed`,
+      tone: "orange",
+    },
+  ];
+
+  const accountMetrics = [
+    {
+      icon: "accounts",
+      label: "Owners",
+      value: summary.owners,
+      caption: "Registered owner accounts",
+      tone: "violet",
+    },
+    {
+      icon: "accounts",
+      label: "Tenants",
+      value: summary.tenants,
+      caption: "Active tenant profiles",
+      tone: "cyan",
+    },
+    {
+      icon: "operations",
+      label: "Providers",
+      value: summary.serviceProviders,
+      caption: "Service providers on the platform",
+      tone: "orange",
+    },
+  ];
+
+  const propertyMetrics = [
+    {
+      icon: "properties",
+      label: "Total Listings",
+      value: summary.totalProperties,
+      caption: "All homes in the catalog",
+      tone: "violet",
+    },
+    {
+      icon: "properties",
+      label: "Active Listings",
+      value: summary.activeProperties,
+      caption: "Currently visible to renters",
+      tone: "emerald",
+    },
+    {
+      icon: "properties",
+      label: "Inactive Listings",
+      value: summary.inactiveProperties,
+      caption: "Paused or hidden homes",
+      tone: "orange",
+    },
+  ];
+
+  const bookingMetrics = [
+    {
+      icon: "bookings",
+      label: "Total Bookings",
+      value: summary.totalBookings,
+      caption: "All reservation records",
+      tone: "violet",
+    },
+    {
+      icon: "bookings",
+      label: "Pending",
+      value: summary.pendingBookings,
+      caption: "Awaiting confirmation",
+      tone: "orange",
+    },
+    {
+      icon: "bookings",
+      label: "Confirmed",
+      value: summary.confirmedBookings,
+      caption: "Ready for check-in",
+      tone: "emerald",
+    },
+    {
+      icon: "deposit",
+      label: "Deposit Pending",
+      value: summary.depositPendingBookings,
+      caption: "Still waiting on deposit payment",
+      tone: "cyan",
+    },
+  ];
+
+  const requestMetrics = [
+    {
+      icon: "requests",
+      label: "Total Requests",
+      value: summary.totalServiceRequests,
+      caption: "All booking-linked support requests",
+      tone: "violet",
+    },
+    {
+      icon: "requests",
+      label: "Awaiting Payment",
+      value: summary.awaitingPaymentRequests,
+      caption: "Blocked until booking payment clears",
+      tone: "orange",
+    },
+    {
+      icon: "requests",
+      label: "Pending Match",
+      value: summary.pendingServiceRequests,
+      caption: "Need provider assignment",
+      tone: "cyan",
+    },
+    {
+      icon: "requests",
+      label: "Accepted",
+      value: summary.acceptedServiceRequests,
+      caption: "In active provider workflow",
+      tone: "emerald",
+    },
+  ];
+
+  const categoryMetrics = [
+    {
+      icon: "categories",
+      label: "Categories",
+      value: categories.length,
+      caption: "Available service groups",
+      tone: "violet",
+    },
+    {
+      icon: "categories",
+      label: "Active",
+      value: activeCategoryCount,
+      caption: "Currently selectable by users",
+      tone: "emerald",
+    },
+    {
+      icon: "categories",
+      label: "Inactive",
+      value: Math.max(categories.length - activeCategoryCount, 0),
+      caption: "Hidden from new requests",
+      tone: "orange",
+    },
+  ];
+
+  const operationsMetrics = [
+    {
+      icon: "operations",
+      label: "All Members",
+      value: allOperationsUsers.length,
+      caption: "Admins and operational users",
+      tone: "violet",
+    },
+    {
+      icon: "operations",
+      label: "Admins",
+      value: opsUsers.admins.length,
+      caption: "Dashboard access accounts",
+      tone: "emerald",
+    },
+    {
+      icon: "accounts",
+      label: "Customers",
+      value: opsUsers.customer.length,
+      caption: "Legacy phone-based customer records",
+      tone: "cyan",
+    },
+    {
+      icon: "operations",
+      label: "Suppliers / Drivers",
+      value: opsUsers.supplier.length + opsUsers.driver.length,
+      caption: "Fulfillment and field users",
+      tone: "orange",
+    },
+  ];
+
+  const operationsColumns = [
+    {
+      key: "name",
+      label: "Staff Name",
+      render: (row) => (
+        <div className="stacked-cell">
+          <strong>{row.name || "-"}</strong>
+          <span>{row.phone || "-"}</span>
+        </div>
+      ),
+    },
+    {
+      key: "email",
+      label: "Email Address",
+      render: (row) => row.email || "-",
+    },
+    {
+      key: "role",
+      label: "Role",
+      render: (row) => (
+        <StatusBadge tone={row._kind === "admin" ? "good" : "info"}>
+          {formatTextLabel(row._kind)}
+        </StatusBadge>
+      ),
+    },
+    {
+      key: "joined",
+      label: "Date Joined",
+      render: (row) => formatDate(row.createdAt || row.updatedAt),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (row) => (
+        <button
+          className="ghost-button compact danger"
+          type="button"
+          onClick={() =>
+            row._kind === "admin"
+              ? handleDeleteAdmin(row.id)
+              : handleDeleteUser(row.id)
+          }
+          disabled={
+            workingKey === `admin-delete-${row.id}`
+            || workingKey === `user-delete-${row.id}`
+          }
+        >
+          {workingKey === `admin-delete-${row.id}`
+          || workingKey === `user-delete-${row.id}`
+            ? "Deleting..."
+            : "Delete"}
+        </button>
+      ),
+    },
+  ];
+
   const renderOperationsBucket = (title, items, kind) => (
     <article className="surface">
       <div className="surface-title-row">
@@ -1380,285 +1890,595 @@ export default function AdminDashboard() {
 
 
 
-  const headerDetails = getHeaderDetails();
-
   return (
-    <main className="dashboard-shell">
-      <aside className="sidebar surface">
-        <div className="sidebar-top">
-          <div className="brand-block">
-            <span className="brand-kicker">Home Rental</span>
-            <h1>Admin center</h1>
-            <p>One place to watch listings, payments, service flow, and team access.</p>
+    <main className="admin-ui-shell">
+      <aside className="admin-ui-sidebar">
+        <div className="admin-ui-sidebar-top">
+          <div className="admin-ui-logo-card">
+            <div className="admin-ui-logo-mark">HR</div>
+            <div className="admin-ui-logo-copy">
+              <strong>Home Rental Admin</strong>
+              <span>Control center</span>
+            </div>
           </div>
 
-          <nav className="nav-list">
+          <span className="admin-ui-sidebar-label">Core System</span>
+
+          <nav className="admin-ui-nav">
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
-                className={`nav-button ${activeView === item.id ? "nav-button-active" : ""}`}
+                className={`admin-ui-nav-button ${activeView === item.id ? "admin-ui-nav-button-active" : ""}`}
                 type="button"
                 onClick={() => setActiveView(item.id)}
               >
-                <strong>{item.label}</strong>
-                <span>{item.description}</span>
+                <span className="admin-ui-nav-icon">
+                  <AdminIcon name={item.id} />
+                </span>
+                <span className="admin-ui-nav-text">{item.label}</span>
+                <span className="admin-ui-nav-rail" />
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="sidebar-footer">
-          <div className="user-profile-card">
-            <span className="eyebrow">Signed in as</span>
-            <h2>{session?.name || "Admin"}</h2>
-            <p>{session?.email || session?.phone || "Authenticated administrator"}</p>
+        <div className="admin-ui-sidebar-footer">
+          <div className="admin-ui-profile-card">
+            <div className="admin-ui-avatar">{sessionInitials}</div>
+            <div className="admin-ui-profile-copy">
+              <strong>{session?.name || "Admin"}</strong>
+              <span>{session?.email || session?.phone || "Authenticated administrator"}</span>
+            </div>
           </div>
           <button
-            className="primary-button subtle"
+            className="primary-button subtle admin-ui-logout"
             type="button"
             onClick={handleLogout}
             disabled={workingKey === "logout"}
           >
+            <AdminIcon name="logout" />
             {workingKey === "logout" ? "Signing out..." : "Sign out"}
           </button>
         </div>
       </aside>
 
-      <section className="content-area">
-        <header className="surface topbar">
-          <div>
-            <h2>{headerDetails.title}</h2>
-            <p>{headerDetails.subtitle}</p>
-          </div>
-
-          <div className="topbar-actions">
-            <button
-              className="ghost-button"
-              type="button"
-              onClick={handleRefresh}
-              disabled={workingKey === "refresh"}
-            >
-              {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
-            </button>
-          </div>
-        </header>
-
+      <section className="admin-ui-main">
         {notice ? (
-          <div className={`notice notice-${notice.type || "info"}`}>
+          <div className={`notice notice-${notice.type || "info"} admin-ui-notice`}>
             {notice.message}
           </div>
         ) : null}
 
         {activeView === "overview" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Platform overview"
-              description="Real-time summary of the home-rental pipeline, including account mix, listing volume, booking health, and service activity."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="System Overview"
+              description="Welcome back. Here is what is moving across accounts, listings, reservations, and support work."
+              actions={(
+                <>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={workingKey === "refresh"}
+                  >
+                    <AdminIcon name="refresh" />
+                    {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                  </button>
+                  <span className="admin-health-pill">
+                    <AdminIcon name="pulse" />
+                    Live sync
+                  </span>
+                </>
+              )}
             />
 
-            <div className="stats-grid">
-              <StatCard
-                label="Active rental accounts"
-                value={summary.activeAccounts}
-                hint={`${summary.owners} owners, ${summary.tenants} tenants, ${summary.serviceProviders} service providers`}
-              />
-              <StatCard
-                label="Live properties"
-                value={summary.activeProperties}
-                hint={`${summary.inactiveProperties} inactive of ${summary.totalProperties} total`}
-              />
-              <StatCard
-                label="Bookings"
-                value={summary.totalBookings}
-                hint={`${summary.confirmedBookings} confirmed, ${summary.pendingBookings} pending`}
-              />
-              <StatCard
-                label="Service requests"
-                value={summary.totalServiceRequests}
-                hint={`${summary.pendingServiceRequests} pending, ${summary.acceptedServiceRequests} accepted`}
-              />
-              <StatCard
-                label="Recognized revenue"
-                value={formatMoney(summary.recognizedRevenue)}
-                hint={`Gross booked value ${formatMoney(summary.grossBookingValue)}`}
-              />
-              <StatCard
-                label="Collected deposits"
-                value={formatMoney(summary.collectedDeposits)}
-                hint={`${summary.depositPendingBookings} bookings still waiting for deposit`}
-              />
+            <div className="admin-metric-grid">
+              {overviewMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
             </div>
 
-            <div className="overview-grid">
-              <DataTable
-                className="recent-properties-table"
-                columns={overviewColumns}
-                rows={overview.recentProperties || []}
-                emptyTitle="No properties yet"
-                emptyDescription="Properties will appear here as owners add listings."
-              />
-              <DataTable
-                className="recent-bookings-table"
-                columns={recentBookingColumns}
-                rows={overview.recentBookings || []}
-                emptyTitle="No bookings yet"
-                emptyDescription="New bookings will appear here once tenants begin reserving properties."
-              />
-              <DataTable
-                className="recent-requests-table"
-                columns={recentRequestColumns}
-                rows={overview.recentServiceRequests || []}
-                emptyTitle="No service requests yet"
-                emptyDescription="Service-provider requests will appear here after paid bookings create service demand."
-              />
+            <div className="admin-overview-layout">
+              <AdminPanel
+                title="Recent Activity"
+                description="A combined feed of the latest listings, bookings, and service requests."
+                className="admin-activity-panel"
+              >
+                {overviewActivity.length === 0 ? (
+                  <EmptyState
+                    title="No recent activity yet"
+                    description="New listings, reservations, and service updates will appear here."
+                  />
+                ) : (
+                  <div className="admin-activity-feed">
+                    {overviewActivity.map((item) => (
+                      <div className="admin-activity-row" key={item.id}>
+                        <span className={`admin-icon-badge admin-tone-${item.tone}`.trim()}>
+                          <AdminIcon name={item.icon} />
+                        </span>
+                        <div className="admin-activity-copy">
+                          <strong>{item.title}</strong>
+                          <p>{item.description}</p>
+                          <span>{item.meta}</span>
+                        </div>
+                        <time>{formatDateTime(item.timestamp)}</time>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </AdminPanel>
+
+              <div className="admin-overview-side">
+                <AdminPanel
+                  title="Revenue Snapshot"
+                  description="Key income markers from the current booking pipeline."
+                >
+                  <div className="admin-stat-list">
+                    <div className="admin-stat-list-row">
+                      <span>Gross booking value</span>
+                      <strong>{formatMoney(summary.grossBookingValue)}</strong>
+                    </div>
+                    <div className="admin-stat-list-row">
+                      <span>Collected deposits</span>
+                      <strong>{formatMoney(summary.collectedDeposits)}</strong>
+                    </div>
+                    <div className="admin-stat-list-row">
+                      <span>Recognized revenue</span>
+                      <strong>{formatMoney(summary.recognizedRevenue)}</strong>
+                    </div>
+                    <div className="admin-stat-list-row">
+                      <span>Deposit paid bookings</span>
+                      <strong>{summary.depositPaidBookings}</strong>
+                    </div>
+                  </div>
+                </AdminPanel>
+
+                <AdminPanel
+                  title="Latest Listings"
+                  description="Newest owner inventory entering the system."
+                >
+                  {(overview.recentProperties || []).length === 0 ? (
+                    <EmptyState
+                      title="No listings yet"
+                      description="Owner-created properties will appear here once available."
+                    />
+                  ) : (
+                    <div className="admin-compact-list">
+                      {(overview.recentProperties || []).slice(0, 4).map((item) => (
+                        <div className="admin-compact-row" key={item.id || item.propertyCode}>
+                          <div className="stacked-cell">
+                            <strong>{item.title}</strong>
+                            <span>{item.ownerName || item.propertyCode || "-"}</span>
+                          </div>
+                          <StatusBadge tone={getTone(item.isActive ? "active" : "inactive")}>
+                            {item.isActive ? "Active" : "Inactive"}
+                          </StatusBadge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </AdminPanel>
+
+                <AdminPanel
+                  title="Latest Reservations"
+                  description="Most recent booking and payment updates."
+                >
+                  {(overview.recentBookings || []).length === 0 ? (
+                    <EmptyState
+                      title="No reservations yet"
+                      description="Tenant booking activity will appear here as it happens."
+                    />
+                  ) : (
+                    <div className="admin-compact-list">
+                      {(overview.recentBookings || []).slice(0, 4).map((item) => (
+                        <div className="admin-compact-row" key={item.id || item.bookingCode}>
+                          <div className="stacked-cell">
+                            <strong>{item.bookingCode}</strong>
+                            <span>{item.propertyTitle || "-"}</span>
+                          </div>
+                          <StatusBadge tone={getTone(item.bookingStatus)}>
+                            {formatTextLabel(item.bookingStatus)}
+                          </StatusBadge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </AdminPanel>
+              </div>
             </div>
           </section>
         ) : null}
 
         {activeView === "accounts" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Home-rental accounts"
-              description="Search the dedicated home-rental identities created through email-based signup."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Account Directory"
+              description="Review home-rental identities created through the app and keep role-based account visibility clear."
+              actions={(
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={workingKey === "refresh"}
+                >
+                  <AdminIcon name="refresh" />
+                  {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                </button>
+              )}
             />
+
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {accountMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
+
             <DataTable
+              className="admin-table-card"
               columns={accountColumns}
               rows={accounts}
               emptyTitle="No rental accounts matched your filters"
               emptyDescription="Try another role filter or a broader search term."
-              filterBar={
+              filterBar={(
                 <form
                   className="ops-filter-bar"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    try { await loadAccounts(accountFilters); }
-                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+
+                    try {
+                      await loadAccounts(accountFilters);
+                    } catch (error) {
+                      setNotice({
+                        type: "error",
+                        message: error.message,
+                      });
+                    }
                   }}
                 >
-                  <select value={accountFilters.role} onChange={(e) => setAccountFilters((c) => ({ ...c, role: e.target.value }))}>
-                    {ACCOUNT_ROLE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select
+                    value={accountFilters.role}
+                    onChange={(event) =>
+                      setAccountFilters((current) => ({
+                        ...current,
+                        role: event.target.value,
+                      }))
+                    }
+                  >
+                    {ACCOUNT_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder="Search name, email, or phone" value={accountFilters.search} onChange={(e) => setAccountFilters((c) => ({ ...c, search: e.target.value }))} />
-                  <button className="ghost-button" type="submit">Apply</button>
+                  <input
+                    placeholder="Search name, email, or phone"
+                    value={accountFilters.search}
+                    onChange={(event) =>
+                      setAccountFilters((current) => ({
+                        ...current,
+                        search: event.target.value,
+                      }))
+                    }
+                  />
+                  <button className="ghost-button" type="submit">
+                    Apply
+                  </button>
                 </form>
-              }
+              )}
             />
           </section>
         ) : null}
 
         {activeView === "properties" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Property administration"
-              description="Review listings, monitor owner activity, and toggle visibility without touching the mobile app."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Property Listings"
+              description="Monitor owner inventory, review location and pricing details, and toggle listing visibility when needed."
+              actions={(
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={workingKey === "refresh"}
+                >
+                  <AdminIcon name="refresh" />
+                  {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                </button>
+              )}
             />
+
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {propertyMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
+
             <DataTable
+              className="admin-table-card"
               columns={propertyColumns}
               rows={properties}
               emptyTitle="No properties matched your filters"
               emptyDescription="Try clearing the status filter or search query."
-              filterBar={
+              filterBar={(
                 <form
                   className="ops-filter-bar"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    try { await loadProperties(propertyFilters); }
-                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+
+                    try {
+                      await loadProperties(propertyFilters);
+                    } catch (error) {
+                      setNotice({
+                        type: "error",
+                        message: error.message,
+                      });
+                    }
                   }}
                 >
-                  <select value={propertyFilters.status} onChange={(e) => setPropertyFilters((c) => ({ ...c, status: e.target.value }))}>
-                    {PROPERTY_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select
+                    value={propertyFilters.status}
+                    onChange={(event) =>
+                      setPropertyFilters((current) => ({
+                        ...current,
+                        status: event.target.value,
+                      }))
+                    }
+                  >
+                    {PROPERTY_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder="Search title, code, owner, location" value={propertyFilters.search} onChange={(e) => setPropertyFilters((c) => ({ ...c, search: e.target.value }))} />
-                  <button className="ghost-button" type="submit">Apply</button>
+                  <input
+                    placeholder="Search title, code, owner, or location"
+                    value={propertyFilters.search}
+                    onChange={(event) =>
+                      setPropertyFilters((current) => ({
+                        ...current,
+                        search: event.target.value,
+                      }))
+                    }
+                  />
+                  <button className="ghost-button" type="submit">
+                    Apply
+                  </button>
                 </form>
-              }
+              )}
             />
           </section>
         ) : null}
 
         {activeView === "bookings" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Booking visibility"
-              description="Track reservation states, deposit behavior, and how much service demand each booking creates."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Reservation Control"
+              description="Track reservation status, payment movement, and service demand generated by active stays."
+              actions={(
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={workingKey === "refresh"}
+                >
+                  <AdminIcon name="refresh" />
+                  {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                </button>
+              )}
             />
+
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {bookingMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
+
             <DataTable
+              className="admin-table-card"
               columns={bookingColumns}
               rows={bookings}
               emptyTitle="No bookings matched your filters"
               emptyDescription="Adjust the booking or payment state filters to widen the result set."
-              filterBar={
+              filterBar={(
                 <form
                   className="ops-filter-bar"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    try { await loadBookings(bookingFilters); }
-                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+
+                    try {
+                      await loadBookings(bookingFilters);
+                    } catch (error) {
+                      setNotice({
+                        type: "error",
+                        message: error.message,
+                      });
+                    }
                   }}
                 >
-                  <select value={bookingFilters.bookingStatus} onChange={(e) => setBookingFilters((c) => ({ ...c, bookingStatus: e.target.value }))}>
-                    {BOOKING_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select
+                    value={bookingFilters.bookingStatus}
+                    onChange={(event) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        bookingStatus: event.target.value,
+                      }))
+                    }
+                  >
+                    {BOOKING_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
-                  <select value={bookingFilters.paymentStatus} onChange={(e) => setBookingFilters((c) => ({ ...c, paymentStatus: e.target.value }))}>
-                    {PAYMENT_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select
+                    value={bookingFilters.paymentStatus}
+                    onChange={(event) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        paymentStatus: event.target.value,
+                      }))
+                    }
+                  >
+                    {PAYMENT_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder="Search booking, property, owner, tenant" value={bookingFilters.search} onChange={(e) => setBookingFilters((c) => ({ ...c, search: e.target.value }))} />
-                  <button className="ghost-button" type="submit">Apply</button>
+                  <input
+                    placeholder="Search booking, property, owner, or tenant"
+                    value={bookingFilters.search}
+                    onChange={(event) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        search: event.target.value,
+                      }))
+                    }
+                  />
+                  <button className="ghost-button" type="submit">
+                    Apply
+                  </button>
                 </form>
-              }
+              )}
             />
           </section>
         ) : null}
 
         {activeView === "requests" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Service request flow"
-              description="Follow provider matching after a booking is fully paid, including assignment activity and response counts."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Service Requests"
+              description="Follow request assignment after payment clears and see where provider fulfillment is slowing down."
+              actions={(
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={workingKey === "refresh"}
+                >
+                  <AdminIcon name="refresh" />
+                  {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                </button>
+              )}
             />
+
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {requestMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
+
             <DataTable
+              className="admin-table-card"
               columns={serviceRequestColumns}
               rows={serviceRequests}
               emptyTitle="No service requests matched your filters"
               emptyDescription="Try switching the request status filter or searching a different booking."
-              filterBar={
+              filterBar={(
                 <form
                   className="ops-filter-bar"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    try { await loadServiceRequests(requestFilters); }
-                    catch (err) { setNotice({ type: "error", message: err.message }); }
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+
+                    try {
+                      await loadServiceRequests(requestFilters);
+                    } catch (error) {
+                      setNotice({
+                        type: "error",
+                        message: error.message,
+                      });
+                    }
                   }}
                 >
-                  <select value={requestFilters.status} onChange={(e) => setRequestFilters((c) => ({ ...c, status: e.target.value }))}>
-                    {REQUEST_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select
+                    value={requestFilters.status}
+                    onChange={(event) =>
+                      setRequestFilters((current) => ({
+                        ...current,
+                        status: event.target.value,
+                      }))
+                    }
+                  >
+                    {REQUEST_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
-                  <input placeholder="Search booking, category, owner, service provider" value={requestFilters.search} onChange={(e) => setRequestFilters((c) => ({ ...c, search: e.target.value }))} />
-                  <button className="ghost-button" type="submit">Apply</button>
+                  <input
+                    placeholder="Search booking, category, owner, or provider"
+                    value={requestFilters.search}
+                    onChange={(event) =>
+                      setRequestFilters((current) => ({
+                        ...current,
+                        search: event.target.value,
+                      }))
+                    }
+                  />
+                  <button className="ghost-button" type="submit">
+                    Apply
+                  </button>
                 </form>
-              }
+              )}
             />
           </section>
         ) : null}
 
         {activeView === "categories" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Service categories"
-              description="Maintain the list that owners and tenants use when they request add-on services."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Categories"
+              description="Define the service catalog owners and tenants can choose from without changing existing category functions."
+              actions={(
+                <>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => {
+                      setCategoryForm({
+                        id: null,
+                        name: "",
+                        description: "",
+                      });
+                      const editor = document.getElementById("category-editor");
+                      if (editor) {
+                        editor.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }
+                    }}
+                  >
+                    <AdminIcon name="plus" />
+                    Create category
+                  </button>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={workingKey === "refresh"}
+                  >
+                    <AdminIcon name="refresh" />
+                    {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                  </button>
+                </>
+              )}
             />
 
-            <div className="split-layout">
-              <article className="surface">
-                <div className="surface-title-row">
-                  <div>
-                    <h3>{categoryForm.id ? "Edit category" : "Create category"}</h3>
-                    <p>Keep the service catalog clean and easy to choose from.</p>
-                  </div>
-                </div>
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {categoryMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
 
-                <form className="form-stack" onSubmit={handleCategorySubmit}>
+            <div className="admin-category-layout">
+              <AdminPanel
+                title={categoryForm.id ? "Edit Category" : "Create Category"}
+                description="Keep the service catalog clean, clear, and easy to manage."
+                className="admin-category-form-panel"
+              >
+                <form className="form-stack" onSubmit={handleCategorySubmit} id="category-editor">
                   <label className="field">
                     <span>Name</span>
                     <input
@@ -1717,26 +2537,110 @@ export default function AdminDashboard() {
                     ) : null}
                   </div>
                 </form>
-              </article>
+              </AdminPanel>
 
-              <DataTable
-                columns={categoryColumns}
-                rows={categories}
-                emptyTitle="No categories available"
-                emptyDescription="Create your first service category to support service-provider workflows."
-              />
+              <div className="admin-category-grid">
+                {categories.length === 0 ? (
+                  <AdminPanel className="admin-category-empty">
+                    <EmptyState
+                      title="No categories available"
+                      description="Create your first service category to support the provider workflow."
+                    />
+                  </AdminPanel>
+                ) : (
+                  categories.map((category) => (
+                    <article className="surface admin-category-card" key={category.id}>
+                      <div className="admin-category-card-head">
+                        <span className="admin-icon-badge">
+                          <AdminIcon name="categories" />
+                        </span>
+                        <StatusBadge tone={getTone(category.is_active ? "active" : "inactive")}>
+                          {category.is_active ? "Active" : "Inactive"}
+                        </StatusBadge>
+                      </div>
+                      <div className="admin-category-card-body">
+                        <h3>{category.name}</h3>
+                        <p>{category.description || "No description added yet."}</p>
+                      </div>
+                      <div className="admin-category-card-footer">
+                        <span className="admin-category-id">System ID: #{category.id}</span>
+                        <div className="inline-actions">
+                          <button
+                            className="ghost-button compact"
+                            type="button"
+                            onClick={() => {
+                              setCategoryForm({
+                                id: category.id,
+                                name: category.name || "",
+                                description: category.description || "",
+                              });
+                              const editor = document.getElementById("category-editor");
+                              if (editor) {
+                                editor.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "start",
+                                });
+                              }
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="ghost-button compact danger"
+                            type="button"
+                            onClick={() => handleCategoryDelete(category.id)}
+                            disabled={workingKey === `category-${category.id}`}
+                          >
+                            {workingKey === `category-${category.id}` ? "Deleting..." : "Delete"}
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                )}
+              </div>
             </div>
           </section>
         ) : null}
 
         {activeView === "operations" ? (
-          <section className="view-stack">
-            <SectionHeader
-              title="Operations users"
-              description="Manage the legacy phone-based accounts used for admin and operational roles."
+          <section className="admin-view">
+            <AdminPageHeader
+              title="Staff Directory"
+              description="Manage dashboard admins and operational users without changing the underlying account flows."
+              actions={(
+                <>
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => {
+                      setShowAdminForm(true);
+                      setShowUserForm(true);
+                    }}
+                  >
+                    <AdminIcon name="plus" />
+                    Add members
+                  </button>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={workingKey === "refresh"}
+                  >
+                    <AdminIcon name="refresh" />
+                    {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                  </button>
+                </>
+              )}
             />
 
-            <div className="split-layout operations-layout">
+            <div className="admin-metric-grid admin-metric-grid-compact">
+              {operationsMetrics.map((metric) => (
+                <AdminMetricCard key={metric.label} {...metric} />
+              ))}
+            </div>
+
+            <div className="admin-form-panels">
               <article className="surface">
                 <div className="surface-title-row">
                   <div>
@@ -1749,7 +2653,7 @@ export default function AdminDashboard() {
                     aria-label="Toggle form"
                     onClick={() => setShowAdminForm((v) => !v)}
                   >
-                    {showAdminForm ? "▾" : "▸"}
+                    {showAdminForm ? "Hide form" : "Open form"}
                   </button>
                 </div>
 
@@ -1831,7 +2735,7 @@ export default function AdminDashboard() {
                     aria-label="Toggle form"
                     onClick={() => setShowUserForm((v) => !v)}
                   >
-                    {showUserForm ? "▾" : "▸"}
+                    {showUserForm ? "Hide form" : "Open form"}
                   </button>
                 </div>
 
@@ -1988,7 +2892,7 @@ export default function AdminDashboard() {
                     </select>
                     <input
                       type="text"
-                      placeholder="Search name, email or phone…"
+                      placeholder="Search name, email or phone..."
                       value={opsSearchFilter}
                       onChange={(e) => setOpsSearchFilter(e.target.value)}
                     />
@@ -2035,7 +2939,7 @@ export default function AdminDashboard() {
                                   }
                                 >
                                   {workingKey === `admin-delete-${u.id}` || workingKey === `user-delete-${u.id}`
-                                    ? "Deleting…"
+                                    ? "Deleting..."
                                     : "Delete"}
                                 </button>
                               </td>
@@ -2054,3 +2958,4 @@ export default function AdminDashboard() {
     </main>
   );
 }
+

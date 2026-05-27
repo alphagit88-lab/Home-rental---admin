@@ -7,37 +7,37 @@ const NAV_ITEMS = [
   {
     id: "overview",
     label: "Overview",
-    description: "KPIs, revenue, and latest activity",
+    description: "KPIs, revenue, and recent activity",
   },
   {
     id: "accounts",
     label: "Rental Accounts",
-    description: "Owners, tenants, and service providers",
+    description: "Owners, tenants, and provider accounts",
   },
   {
     id: "properties",
     label: "Properties",
-    description: "Listings and live activation control",
+    description: "Listings and activation controls",
   },
   {
     id: "bookings",
     label: "Bookings",
-    description: "Reservation and payment visibility",
+    description: "Reservations and payment tracking",
   },
   {
     id: "requests",
     label: "Service Requests",
-    description: "Post-booking service-provider workflows",
+    description: "Provider assignments and progress",
   },
   {
     id: "categories",
     label: "Categories",
-    description: "Service category management",
+    description: "Service catalog management",
   },
   {
     id: "operations",
-    label: "User Management",
-    description: "Admins, customers, suppliers, drivers",
+    label: "Team & Access",
+    description: "Admins, suppliers, customers, drivers",
   },
 ];
 
@@ -316,11 +316,15 @@ function StatCard({ label, value, hint }) {
   );
 }
 
-function SectionHeader({ title, description, actions }) {
-  if (!actions) return null;
+function SectionHeader({ title, description, actions, kicker }) {
   return (
-    <div className="section-header-actions-only">
-      {actions}
+    <div className="section-header">
+      <div>
+        {kicker ? <span className="section-kicker">{kicker}</span> : null}
+        <h2>{title}</h2>
+        {description ? <p>{description}</p> : null}
+      </div>
+      {actions ? <div className="section-actions">{actions}</div> : null}
     </div>
   );
 }
@@ -331,6 +335,79 @@ function EmptyState({ title, description }) {
       <strong>{title}</strong>
       <p>{description}</p>
     </div>
+  );
+}
+
+function HeroMetric({ label, value, hint }) {
+  return (
+    <div className="hero-metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{hint}</small>
+    </div>
+  );
+}
+
+function CommandCard({
+  eyebrow,
+  title,
+  value,
+  description,
+  actionLabel,
+  onAction,
+}) {
+  return (
+    <article className="surface command-card">
+      <span className="command-card-eyebrow">{eyebrow}</span>
+      <strong className="command-card-value">{value}</strong>
+      <h3>{title}</h3>
+      <p>{description}</p>
+      <button className="ghost-button compact" type="button" onClick={onAction}>
+        {actionLabel}
+      </button>
+    </article>
+  );
+}
+
+function ActivityListCard({
+  kicker,
+  title,
+  description,
+  items,
+  emptyTitle,
+  emptyDescription,
+  actionLabel,
+  onAction,
+  renderItem,
+}) {
+  return (
+    <article className="surface activity-list-card">
+      <div className="activity-list-head">
+        <div>
+          <span className="section-kicker">{kicker}</span>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+        <button className="ghost-button compact" type="button" onClick={onAction}>
+          {actionLabel}
+        </button>
+      </div>
+
+      {items.length === 0 ? (
+        <EmptyState title={emptyTitle} description={emptyDescription} />
+      ) : (
+        <div className="activity-list">
+          {items.map((item, index) => (
+            <div
+              className="activity-list-row"
+              key={item.id || item.bookingCode || `${title}-${index}`}
+            >
+              {renderItem(item)}
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -1337,109 +1414,492 @@ export default function AdminDashboard() {
     switch (activeView) {
       case "overview":
         return {
-          title: "Platform overview",
-          subtitle: "Real-time summary of the home-rental pipeline, including account mix, listing volume, booking health, and service activity.",
+          kicker: "Operations brief",
+          title: "Rental program command center",
+          subtitle:
+            "Track the full platform from inventory and revenue to service follow-up, then move into each workspace without losing the overall picture.",
+          metrics: [
+            {
+              label: "Recognized revenue",
+              value: formatMoney(summary.recognizedRevenue),
+              hint: `Gross pipeline ${formatMoney(summary.grossBookingValue)}`,
+            },
+            {
+              label: "Live inventory",
+              value: summary.activeProperties,
+              hint: `${summary.inactiveProperties} inactive of ${summary.totalProperties}`,
+            },
+            {
+              label: "Bookings in system",
+              value: summary.totalBookings,
+              hint: `${summary.confirmedBookings} confirmed and ${summary.pendingBookings} pending`,
+            },
+          ],
+          panelTitle: "What to watch next",
+          panelText:
+            "Use this surface to spot drift early, then step into the detailed tables below when a number needs action.",
+          panelPoints: [
+            {
+              label: "Account mix",
+              value: `${summary.owners}/${summary.tenants}/${summary.serviceProviders}`,
+              hint: "owners, tenants, and service providers",
+            },
+            {
+              label: "Deposit follow-up",
+              value: summary.depositPendingBookings,
+              hint: "bookings still waiting on first payment",
+            },
+            {
+              label: "Service queue",
+              value: summary.pendingServiceRequests,
+              hint: "requests waiting for provider movement",
+            },
+          ],
         };
       case "accounts":
         return {
-          title: "Rental accounts",
+          kicker: "Identity desk",
+          title: "Rental account coverage",
           subtitle: "Manage owners, tenants, and service providers across the rental app.",
+          metrics: [
+            {
+              label: "Active accounts",
+              value: summary.activeAccounts,
+              hint: `${summary.owners} owners currently onboarded`,
+            },
+            {
+              label: "Tenants",
+              value: summary.tenants,
+              hint: "email-based renter accounts",
+            },
+            {
+              label: "Providers",
+              value: summary.serviceProviders,
+              hint: "service accounts available for requests",
+            },
+          ],
+          panelTitle: "Coverage snapshot",
+          panelText:
+            "Account health drives every other workflow, so this workspace stays centered on who can list, book, and fulfill requests.",
+          panelPoints: [
+            {
+              label: "Listings per owner",
+              value: summary.owners ? (summary.totalProperties / summary.owners).toFixed(1) : "0.0",
+              hint: "average homes managed by each owner",
+            },
+            {
+              label: "Bookings per tenant",
+              value: summary.tenants ? (summary.totalBookings / summary.tenants).toFixed(1) : "0.0",
+              hint: "average reservation volume per tenant",
+            },
+            {
+              label: "Provider demand",
+              value: summary.serviceProviders ? (summary.totalServiceRequests / summary.serviceProviders).toFixed(1) : "0.0",
+              hint: "requests created for each service provider account",
+            },
+          ],
         };
       case "properties":
         return {
-          title: "Properties control",
+          kicker: "Listing control",
+          title: "Property portfolio control",
           subtitle: "Monitor, activate, edit, and control home rental listings.",
+          metrics: [
+            {
+              label: "Live homes",
+              value: summary.activeProperties,
+              hint: `${summary.totalProperties} total homes in the catalog`,
+            },
+            {
+              label: "Inactive homes",
+              value: summary.inactiveProperties,
+              hint: "listings currently hidden from the market",
+            },
+            {
+              label: "Gross booking value",
+              value: formatMoney(summary.grossBookingValue),
+              hint: "revenue influenced by live supply",
+            },
+          ],
+          panelTitle: "Supply pressure",
+          panelText:
+            "Inventory supply changes the entire operating rhythm, so keep an eye on activation and owner momentum here.",
+          panelPoints: [
+            {
+              label: "Owner coverage",
+              value: summary.owners,
+              hint: "owners supporting current supply",
+            },
+            {
+              label: "Active bookings",
+              value: summary.confirmedBookings,
+              hint: "confirmed stays currently leaning on supply",
+            },
+            {
+              label: "Availability risk",
+              value: summary.inactiveProperties,
+              hint: "homes that may need follow-up before demand peaks",
+            },
+          ],
         };
       case "bookings":
         return {
-          title: "Bookings & Reservations",
+          kicker: "Revenue watch",
+          title: "Bookings and payment flow",
           subtitle: "Track tenant bookings, checkout schedules, and booking payments.",
+          metrics: [
+            {
+              label: "Total bookings",
+              value: summary.totalBookings,
+              hint: `${summary.completedBookings} completed stays`,
+            },
+            {
+              label: "Confirmed stays",
+              value: summary.confirmedBookings,
+              hint: `${summary.pendingBookings} still pending approval`,
+            },
+            {
+              label: "Collected deposits",
+              value: formatMoney(summary.collectedDeposits),
+              hint: `${summary.depositPendingBookings} deposits still outstanding`,
+            },
+          ],
+          panelTitle: "Payment posture",
+          panelText:
+            "This workspace pairs reservation state with payment state so finance issues surface beside stay issues.",
+          panelPoints: [
+            {
+              label: "Deposit paid",
+              value: summary.depositPaidBookings,
+              hint: "bookings that cleared their first payment",
+            },
+            {
+              label: "Fully paid",
+              value: summary.paidBookings,
+              hint: "bookings ready to unlock full service flow",
+            },
+            {
+              label: "Cancelled",
+              value: summary.cancelledBookings,
+              hint: "reservations lost from the active pipeline",
+            },
+          ],
         };
       case "requests":
         return {
-          title: "Service Requests",
+          kicker: "Service desk",
+          title: "Service request movement",
           subtitle: "Track service-provider assignment, acceptance, and completion.",
+          metrics: [
+            {
+              label: "Total requests",
+              value: summary.totalServiceRequests,
+              hint: `${summary.completedServiceRequests} completed end-to-end`,
+            },
+            {
+              label: "Pending requests",
+              value: summary.pendingServiceRequests,
+              hint: "requests waiting for provider action",
+            },
+            {
+              label: "Accepted requests",
+              value: summary.acceptedServiceRequests,
+              hint: "work already picked up by providers",
+            },
+          ],
+          panelTitle: "Fulfillment posture",
+          panelText:
+            "Requests become the hand-off point between paid bookings and provider operations, so lag here impacts customer confidence fast.",
+          panelPoints: [
+            {
+              label: "Awaiting payment",
+              value: summary.awaitingPaymentRequests,
+              hint: "requests blocked until the booking settles",
+            },
+            {
+              label: "Completed",
+              value: summary.completedServiceRequests,
+              hint: "requests fully delivered",
+            },
+            {
+              label: "Cancelled",
+              value: summary.cancelledServiceRequests,
+              hint: "requests that dropped out of the queue",
+            },
+          ],
         };
       case "categories":
         return {
-          title: "Service Categories",
+          kicker: "Catalog admin",
+          title: "Service category structure",
           subtitle: "Manage maintenance service types, categories, and tags.",
+          metrics: [
+            {
+              label: "Categories",
+              value: categories.length,
+              hint: "service types available to the platform",
+            },
+            {
+              label: "Requests using catalog",
+              value: summary.totalServiceRequests,
+              hint: "workflow volume dependent on these options",
+            },
+            {
+              label: "Completed services",
+              value: summary.completedServiceRequests,
+              hint: "delivered through the current catalog",
+            },
+          ],
+          panelTitle: "Catalog quality",
+          panelText:
+            "A tight category list keeps requests clean for tenants, owners, and providers, especially when volume starts to climb.",
+          panelPoints: [
+            {
+              label: "Pending requests",
+              value: summary.pendingServiceRequests,
+              hint: "volume that will rely on clear category routing",
+            },
+            {
+              label: "Accepted requests",
+              value: summary.acceptedServiceRequests,
+              hint: "live work already tied to category choices",
+            },
+            {
+              label: "Recent catalog size",
+              value: categories.length,
+              hint: "review inactive or overlapping categories regularly",
+            },
+          ],
         };
       case "operations":
         return {
-          title: "User Management",
-          subtitle: "Manage administrative, customer, supplier, and driver accounts.",
+          kicker: "Access control",
+          title: "Team and access",
+          subtitle: "Manage admin, customer, supplier, and driver accounts in one place.",
+          metrics: [
+            {
+              label: "Admins",
+              value: opsUsers.admins.length,
+              hint: "people with dashboard access",
+            },
+            {
+              label: "Suppliers",
+              value: opsUsers.supplier.length,
+              hint: "legacy supplier accounts in the system",
+            },
+            {
+              label: "Drivers",
+              value: opsUsers.driver.length,
+              hint: "legacy driver accounts attached to suppliers",
+            },
+          ],
+          panelTitle: "Access snapshot",
+          panelText:
+            "Keep operations roles clear and easy to audit across the older phone-based workflow.",
+          panelPoints: [
+            {
+              label: "Customers",
+              value: opsUsers.customer.length,
+              hint: "legacy customer accounts stored here",
+            },
+            {
+              label: "Admin share",
+              value: `${opsUsers.admins.length}/${opsUsers.admins.length + opsUsers.customer.length + opsUsers.supplier.length + opsUsers.driver.length || 0}`,
+              hint: "admins compared with the full operations user pool",
+            },
+            {
+              label: "Supplier network",
+              value: opsUsers.supplier.length + opsUsers.driver.length,
+              hint: "supplier and driver accounts combined",
+            },
+          ],
         };
       default:
         return {
-          title: "Admin Console",
+          kicker: "Admin console",
+          title: "Rental admin workspace",
           subtitle: "Manage your rental listings, payments, and system operations.",
+          metrics: [],
+          panelTitle: "Workspace overview",
+          panelText: "Choose a workspace from the rail to begin.",
+          panelPoints: [],
         };
     }
   };
 
-
-
   const headerDetails = getHeaderDetails();
+  const overviewStoryCards = [
+    {
+      kicker: "Revenue pulse",
+      title: formatMoney(summary.recognizedRevenue),
+      description:
+        "Recognized revenue sits at the center of the operating story, with deposits and gross booking value showing how much is still moving through the pipeline.",
+      notes: [
+        `Gross booked ${formatMoney(summary.grossBookingValue)}`,
+        `${summary.paidBookings} fully paid bookings`,
+        `${summary.depositPendingBookings} deposits still due`,
+      ],
+      tone: "primary",
+    },
+    {
+      kicker: "Inventory momentum",
+      title: `${summary.activeProperties} live homes`,
+      description:
+        "Supply is healthy when active listings stay ahead of demand, while inactive properties become your first signal for portfolio follow-up.",
+      notes: [
+        `${summary.totalProperties} homes in total`,
+        `${summary.inactiveProperties} inactive listings`,
+        `${summary.confirmedBookings} confirmed stays leaning on supply`,
+      ],
+    },
+    {
+      kicker: "Service demand",
+      title: `${summary.totalServiceRequests} requests in motion`,
+      description:
+        "Service flow keeps the post-booking experience stable, so pending and accepted requests deserve quick attention before they pile up.",
+      notes: [
+        `${summary.pendingServiceRequests} pending`,
+        `${summary.acceptedServiceRequests} accepted`,
+        `${summary.completedServiceRequests} completed`,
+      ],
+    },
+  ];
+  const overviewCommandCards = [
+    {
+      id: "accounts",
+      eyebrow: "Accounts",
+      value: summary.activeAccounts,
+      title: "Identity pipeline",
+      description: `${summary.owners} owners, ${summary.tenants} tenants, and ${summary.serviceProviders} service providers currently power the platform.`,
+      actionLabel: "Open accounts",
+    },
+    {
+      id: "properties",
+      eyebrow: "Properties",
+      value: summary.activeProperties,
+      title: "Portfolio control",
+      description: `${summary.totalProperties} homes are tracked here, with activation controls for every listing.`,
+      actionLabel: "Open properties",
+    },
+    {
+      id: "bookings",
+      eyebrow: "Bookings",
+      value: summary.totalBookings,
+      title: "Reservation flow",
+      description: `${summary.confirmedBookings} confirmed stays and ${summary.pendingBookings} pending reservations are currently in play.`,
+      actionLabel: "Open bookings",
+    },
+    {
+      id: "requests",
+      eyebrow: "Requests",
+      value: summary.totalServiceRequests,
+      title: "Service queue",
+      description: `${summary.pendingServiceRequests} pending requests and ${summary.acceptedServiceRequests} accepted jobs need ongoing follow-through.`,
+      actionLabel: "Open requests",
+    },
+  ];
 
   return (
     <main className="dashboard-shell">
-      <aside className="sidebar surface">
-        <div className="sidebar-top">
-          <div className="brand-block">
-            <span className="brand-kicker">Home Rental</span>
-            <h1>Admin center</h1>
-            <p>One place to watch listings, payments, service flow, and team access.</p>
+      <section className="content-area content-area-wide">
+        <header className="surface top-rail">
+          <div className="top-rail-main">
+            <div className="brand-block top-rail-brand">
+              <span className="brand-kicker">Home Rental</span>
+              <h1>Admin center</h1>
+              <p>One place to watch listings, payments, service flow, and team access.</p>
+            </div>
+
+            <nav className="nav-list top-rail-nav">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  className={`nav-button ${activeView === item.id ? "nav-button-active" : ""}`}
+                  type="button"
+                  onClick={() => setActiveView(item.id)}
+                >
+                  <strong>{item.label}</strong>
+                  <span>{item.description}</span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <nav className="nav-list">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                className={`nav-button ${activeView === item.id ? "nav-button-active" : ""}`}
-                type="button"
-                onClick={() => setActiveView(item.id)}
-              >
-                <strong>{item.label}</strong>
-                <span>{item.description}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
+          <div className="top-rail-meta">
+            <div className="sidebar-story top-rail-story">
+              <span className="sidebar-story-label">Daily pulse</span>
+              <strong>{formatMoney(summary.grossBookingValue)}</strong>
+              <p>
+                Gross booked value across {summary.totalBookings} reservations and{" "}
+                {summary.activeProperties} live homes.
+              </p>
+            </div>
 
-        <div className="sidebar-footer">
-          <div className="user-profile-card">
-            <span className="eyebrow">Signed in as</span>
-            <h2>{session?.name || "Admin"}</h2>
-            <p>{session?.email || session?.phone || "Authenticated administrator"}</p>
+            <div className="sidebar-footer top-rail-account">
+              <div className="user-profile-card">
+                <span className="eyebrow">Signed in as</span>
+                <h2>{session?.name || "Admin"}</h2>
+                <p>{session?.email || session?.phone || "Authenticated administrator"}</p>
+              </div>
+              <div className="top-rail-actions">
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={workingKey === "refresh"}
+                >
+                  {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
+                </button>
+                <button
+                  className="primary-button subtle"
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={workingKey === "logout"}
+                >
+                  {workingKey === "logout" ? "Signing out..." : "Sign out"}
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            className="primary-button subtle"
-            type="button"
-            onClick={handleLogout}
-            disabled={workingKey === "logout"}
-          >
-            {workingKey === "logout" ? "Signing out..." : "Sign out"}
-          </button>
-        </div>
-      </aside>
+        </header>
 
-      <section className="content-area">
-        <header className="surface topbar">
-          <div>
-            <h2>{headerDetails.title}</h2>
-            <p>{headerDetails.subtitle}</p>
-          </div>
+        <header className="surface topbar topbar-hero">
+          <div className="topbar-grid">
+            <div className="topbar-copy">
+              <span className="eyebrow">{headerDetails.kicker}</span>
+              <div className="topbar-copy-header">
+                <div>
+                  <h2>{headerDetails.title}</h2>
+                  <p>{headerDetails.subtitle}</p>
+                </div>
+              </div>
 
-          <div className="topbar-actions">
-            <button
-              className="ghost-button"
-              type="button"
-              onClick={handleRefresh}
-              disabled={workingKey === "refresh"}
-            >
-              {workingKey === "refresh" ? "Refreshing..." : "Refresh data"}
-            </button>
+              <div className="hero-metrics-grid">
+                {headerDetails.metrics.map((metric) => (
+                  <HeroMetric
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                    hint={metric.hint}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <aside className="hero-panel">
+              <span className="hero-panel-label">Control room</span>
+              <strong>{headerDetails.panelTitle}</strong>
+              <p>{headerDetails.panelText}</p>
+              <div className="hero-panel-list">
+                {headerDetails.panelPoints.map((point) => (
+                  <div className="hero-panel-item" key={point.label}>
+                    <span>{point.label}</span>
+                    <strong>{point.value}</strong>
+                    <small>{point.hint}</small>
+                  </div>
+                ))}
+              </div>
+            </aside>
           </div>
         </header>
 
@@ -1452,9 +1912,28 @@ export default function AdminDashboard() {
         {activeView === "overview" ? (
           <section className="view-stack">
             <SectionHeader
-              title="Platform overview"
-              description="Real-time summary of the home-rental pipeline, including account mix, listing volume, booking health, and service activity."
+              kicker="Platform pulse"
+              title="Daily operating picture"
+              description="A sectional view of revenue, live inventory, booking health, and service follow-through so the team can move from signal to action fast."
             />
+
+            <div className="overview-story-grid">
+              {overviewStoryCards.map((card) => (
+                <article
+                  key={card.kicker}
+                  className={`surface story-card ${card.tone === "primary" ? "story-card-primary" : ""}`.trim()}
+                >
+                  <span className="section-kicker">{card.kicker}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.description}</p>
+                  <div className="story-note-list">
+                    {card.notes.map((note) => (
+                      <span key={note}>{note}</span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
 
             <div className="stats-grid">
               <StatCard
@@ -1489,27 +1968,104 @@ export default function AdminDashboard() {
               />
             </div>
 
-            <div className="overview-grid">
-              <DataTable
-                className="recent-properties-table"
-                columns={overviewColumns}
-                rows={overview.recentProperties || []}
+            <SectionHeader
+              kicker="Workspaces"
+              title="Jump into the next area"
+              description="Each lane carries its own operational count so you can open the right workspace without scanning every table first."
+            />
+
+            <div className="overview-command-grid">
+              {overviewCommandCards.map((card) => (
+                <CommandCard
+                  key={card.id}
+                  eyebrow={card.eyebrow}
+                  title={card.title}
+                  value={card.value}
+                  description={card.description}
+                  actionLabel={card.actionLabel}
+                  onAction={() => setActiveView(card.id)}
+                />
+              ))}
+            </div>
+
+            <SectionHeader
+              kicker="Recent activity"
+              title="Newest movements across the platform"
+              description="Fresh listings, bookings, and service requests surface here first before you drill into the detailed tables."
+            />
+
+            <div className="overview-activity-grid">
+              <ActivityListCard
+                kicker="Latest listings"
+                title="Property arrivals"
+                description="The newest properties entering the system."
+                items={(overview.recentProperties || []).slice(0, 4)}
                 emptyTitle="No properties yet"
                 emptyDescription="Properties will appear here as owners add listings."
+                actionLabel="View properties"
+                onAction={() => setActiveView("properties")}
+                renderItem={(row) => (
+                  <>
+                    <div className="stacked-cell">
+                      <strong>{row.title}</strong>
+                      <span>{row.propertyCode} · {row.ownerName}</span>
+                    </div>
+                    <div className="activity-item-meta">
+                      <span>{formatMoney(row.monthlyRent, true)}</span>
+                      <StatusBadge tone={getTone(row.isActive ? "active" : "inactive")}>
+                        {row.isActive ? "Active" : "Inactive"}
+                      </StatusBadge>
+                    </div>
+                  </>
+                )}
               />
-              <DataTable
-                className="recent-bookings-table"
-                columns={recentBookingColumns}
-                rows={overview.recentBookings || []}
+              <ActivityListCard
+                kicker="Latest reservations"
+                title="Booking movement"
+                description="Fresh reservations and their payment state."
+                items={(overview.recentBookings || []).slice(0, 4)}
                 emptyTitle="No bookings yet"
                 emptyDescription="New bookings will appear here once tenants begin reserving properties."
+                actionLabel="View bookings"
+                onAction={() => setActiveView("bookings")}
+                renderItem={(row) => (
+                  <>
+                    <div className="stacked-cell">
+                      <strong>{row.bookingCode}</strong>
+                      <span>{row.propertyTitle} · {row.tenantName}</span>
+                    </div>
+                    <div className="activity-item-meta stacked-cell">
+                      <StatusBadge tone={getTone(row.bookingStatus)}>
+                        {row.bookingStatus}
+                      </StatusBadge>
+                      <span>{row.paymentStatus}</span>
+                    </div>
+                  </>
+                )}
               />
-              <DataTable
-                className="recent-requests-table"
-                columns={recentRequestColumns}
-                rows={overview.recentServiceRequests || []}
+              <ActivityListCard
+                kicker="Latest services"
+                title="Request follow-up"
+                description="Service demand created by recent bookings."
+                items={(overview.recentServiceRequests || []).slice(0, 4)}
                 emptyTitle="No service requests yet"
                 emptyDescription="Service-provider requests will appear here after paid bookings create service demand."
+                actionLabel="View requests"
+                onAction={() => setActiveView("requests")}
+                renderItem={(row) => (
+                  <>
+                    <div className="stacked-cell">
+                      <strong>{row.serviceCategoryName}</strong>
+                      <span>{row.propertyTitle} · {row.tenantName}</span>
+                    </div>
+                    <div className="activity-item-meta stacked-cell">
+                      <StatusBadge tone={getTone(row.requestStatus)}>
+                        {row.requestStatus}
+                      </StatusBadge>
+                      <span>{row.serviceProviderName || "Awaiting provider"}</span>
+                    </div>
+                  </>
+                )}
               />
             </div>
           </section>

@@ -23,41 +23,70 @@ export default function HomePage() {
   };
 
   return (
-    <div className="landing-layout">
+    <div className="landing-layout" id="top">
 
       {/* ── Navigation ── */}
       <nav className={`landing-nav ${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""}`}>
-        <div className="nav-container">
-          <div className="nav-logo-card">
-            <span className="brand-logo-icon">
-              <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#c00b4c"/>
-                <path d="M10 11h4v5h-4z" fill="white"/>
-                <path d="M8 11l4-4 4 4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <div className="brand-logo-text">
-              <span className="brand-primary">HomeGo</span>
-              <span className="brand-domain">BNB</span>
+        <div className="nav-top-strip">
+          <div className="nav-top-inner">
+            <p className="nav-top-copy">
+              <span className="nav-top-copy-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 10.5 12 3l9 7.5" />
+                  <path d="M5.5 9.5V20h13V9.5" />
+                  <path d="M9 20v-5.5h6V20" />
+                </svg>
+              </span>
+              Curated stays, hosting support, and island-wide guest care
+            </p>
+            <div className="nav-top-badge">
+              <span className="nav-top-badge-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m13 2-8 11h6l-1 9 8-11h-6l1-9Z" />
+                </svg>
+              </span>
+              Island-wide booking support
             </div>
           </div>
+        </div>
 
-          <div className="nav-links">
-            <a href="#how-it-works" className="nav-link">How It Works</a>
-            <a href="#destinations" className="nav-link">Destinations</a>
-            <a href="#about" className="nav-link">About</a>
-            <a href="#contact" className="list-room-btn">Contact</a>
+        <div className="nav-main-shell">
+          <div className="nav-container">
+            <Link href="/" className="nav-logo-card" aria-label="HomeGo BNB home">
+              <span className="brand-logo-icon">
+                <span className="brand-logo-emblem">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 10.5 12 3l9 7.5" />
+                    <path d="M5.5 9.5V20h13V9.5" />
+                    <path d="M9 20v-5.5h6V20" />
+                  </svg>
+                </span>
+              </span>
+              <div className="brand-logo-text">
+                <span className="brand-primary">HomeGo BNB</span>
+                <span className="brand-domain">Homestays. Hosting. Support.</span>
+              </div>
+            </Link>
+
+            <div className="nav-links">
+              <a href="#top" className="nav-link">Home</a>
+              <a href="#how-it-works" className="nav-link">How It Works</a>
+              <a href="#destinations" className="nav-link">Destinations</a>
+              <a href="#about" className="nav-link">About</a>
+              <a href="#contact" className="nav-link">Contact</a>
+            </div>
+
+            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              <div className="bar"></div>
+              <div className="bar"></div>
+              <div className="bar"></div>
+            </button>
           </div>
-
-          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-            <div className="bar"></div>
-            <div className="bar"></div>
-            <div className="bar"></div>
-          </button>
         </div>
 
         {mobileMenuOpen && (
           <div className="mobile-nav-panel">
+            <a href="#top" onClick={() => setMobileMenuOpen(false)}>Home</a>
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <a href="#destinations" onClick={() => setMobileMenuOpen(false)}>Destinations</a>
             <a href="#about" onClick={() => setMobileMenuOpen(false)}>About</a>

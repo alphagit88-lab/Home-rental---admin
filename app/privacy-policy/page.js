@@ -1,16 +1,38 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="landing-layout">
       <nav className="landing-nav surface">
-        <div className="nav-container">
-          <div className="nav-logo">
-            <span className="brand-icon">⌂</span>
-            <strong>HomeRental</strong>
+        <div className="nav-top-strip">
+          <div className="nav-top-inner">
+            <p className="nav-top-copy">Policies, guest support, and data privacy information</p>
+            <div className="nav-top-badge">Privacy policy</div>
           </div>
-          <div className="nav-links">
-            <Link href="/">Back to Home</Link>
+        </div>
+
+        <div className="nav-main-shell">
+          <div className="nav-container">
+            <Link href="/" className="nav-logo-card" aria-label="HomeGo BNB home">
+              <span className="brand-logo-icon">
+                <span className="brand-logo-emblem">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 10.5 12 3l9 7.5" />
+                    <path d="M5.5 9.5V20h13V9.5" />
+                    <path d="M9 20v-5.5h6V20" />
+                  </svg>
+                </span>
+              </span>
+              <div className="brand-logo-text">
+                <span className="brand-primary">HomeGo BNB</span>
+                <span className="brand-domain">Homestays. Hosting. Support.</span>
+              </div>
+            </Link>
+
+            <div className="nav-links nav-links-static">
+              <Link href="/" className="nav-link">Home</Link>
+              <span className="nav-link nav-link-current">Privacy Policy</span>
+            </div>
           </div>
         </div>
       </nav>

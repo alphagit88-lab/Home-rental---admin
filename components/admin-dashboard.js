@@ -1025,11 +1025,37 @@ export default function AdminDashboard() {
 
   if (booting) {
     return (
-      <main className="loading-screen">
-        <div className="loading-card">
-          <div className="loading-glow" />
-          <strong>Preparing the admin workspace</strong>
-          <p>Checking your session and syncing data from the backend.</p>
+      <main className="new-login-container">
+        <div className="new-login-sidebar" style={{ minHeight: '100vh' }}>
+          <div className="new-login-sidebar-content">
+            <div className="new-login-logo-container">
+              <div className="new-login-logo">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#c00b4c"></path>
+                  <path d="M10 11h4v5h-4z" fill="white"></path>
+                  <path d="M8 11l4-4 4 4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="new-login-content">
+          <div className="new-login-form-wrapper">
+            <div className="new-login-mobile-logo" style={{ marginBottom: '2rem' }}>
+              <div className="new-login-logo">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#c00b4c"></path>
+                  <path d="M10 11h4v5h-4z" fill="white"></path>
+                  <path d="M8 11l4-4 4 4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
+                </svg>
+              </div>
+            </div>
+            <h1 className="new-login-title">Preparing admin workspace</h1>
+            <p className="new-login-subtitle">Checking your session and syncing data from the backend.</p>
+            <div className="new-login-spinner-container">
+              <div className="new-login-spinner"></div>
+            </div>
+          </div>
         </div>
       </main>
     );

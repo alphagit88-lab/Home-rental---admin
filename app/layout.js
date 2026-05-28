@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Home Rental Admin",
-  description: "Administrative console for the Home Rental platform.",
+  title: "HomeGoBNB",
+  description: "HomeGoBNB platform.",
 };
 
 export default function RootLayout({ children }) {

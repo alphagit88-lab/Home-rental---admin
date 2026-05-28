@@ -1525,8 +1525,8 @@ body:has(.admin-ui-shell) {
 
 .admin-ui-logo-mark {
   color: #ffffff;
-  background: linear-gradient(135deg, var(--admin-accent) 0%, #7868ff 100%);
-  box-shadow: 0 14px 28px rgba(88, 72, 239, 0.28);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .admin-ui-logo-copy {

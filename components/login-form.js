@@ -101,7 +101,7 @@ export default function LoginForm() {
               </svg>
             </div>
           </div>
-          <p className="new-login-tagline">Home Rental Admin Platform</p>
+          <p className="new-login-tagline">HomeGoBNB Platform</p>
           <div className="new-login-dots">
             <div className="new-login-dot active"></div>
             <div className="new-login-dot"></div>

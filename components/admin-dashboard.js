@@ -1874,17 +1874,17 @@ export default function AdminDashboard() {
       case "overview":
         return {
           title: "Platform overview",
-          subtitle: "Real-time summary of the home-rental pipeline, including account mix, listing volume, booking health, and service activity.",
+          subtitle: "Real-time summary of the HomeGoBNB pipeline, including account mix, listing volume, booking health, and service activity.",
         };
       case "accounts":
         return {
-          title: "Rental accounts",
-          subtitle: "Manage owners, tenants, and service providers across the rental app.",
+          title: "Accounts",
+          subtitle: "Manage owners, tenants, and service providers across the HomeGoBNB app.",
         };
       case "properties":
         return {
           title: "Properties control",
-          subtitle: "Monitor, activate, edit, and control home rental listings.",
+          subtitle: "Monitor, activate, edit, and control HomeGoBNB listings.",
         };
       case "bookings":
         return {
@@ -1921,9 +1921,15 @@ export default function AdminDashboard() {
       <aside className="admin-ui-sidebar">
         <div className="admin-ui-sidebar-top">
           <div className="admin-ui-logo-card">
-            <div className="admin-ui-logo-mark">HR</div>
+            <div className="admin-ui-logo-mark">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#c00b4c"></path>
+                <path d="M10 11h4v5h-4z" fill="white"></path>
+                <path d="M8 11l4-4 4 4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path>
+              </svg>
+            </div>
             <div className="admin-ui-logo-copy">
-              <strong>Home Rental Admin</strong>
+              <strong>HomeGoBNB Admin</strong>
               <span>Control center</span>
             </div>
           </div>
@@ -2120,7 +2126,7 @@ export default function AdminDashboard() {
           <section className="admin-view">
             <AdminPageHeader
               title="Account Directory"
-              description="Review home-rental identities created through the app and keep role-based account visibility clear."
+              description="Review HomeGoBNB identities created through the app and keep role-based account visibility clear."
               actions={(
                 <button
                   className="ghost-button"
